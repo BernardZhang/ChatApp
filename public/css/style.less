@@ -1,0 +1,345 @@
+html, body {
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    // display: block !important;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@fontSize: 15px;
+@borderColor: #ddd;
+@activeColor: lightgreen;
+@headerHeight: 50px;
+
+.hide {
+    display: none !important;
+}
+
+.border-radius (@radius: 5px) {
+    border-radius: @radius;
+}
+
+.flex (@flex: 1) {
+    -webkit-flex: @flex;
+    -ms-flex: @flex;
+    flex: @flex;
+}
+
+.display-flex (@direction: row) {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: @direction;
+        -ms-flex-direction: @direction;
+            flex-direction: @direction;
+}
+
+body {
+    border: 1px solid @borderColor;
+    .display-flex(column);
+    header,
+    footer {
+        height: 50px;
+        background: @activeColor;
+        color: #fff;
+    }
+    section {
+        .flex(1);
+    }
+}
+
+header h3 {
+    text-align: center;
+}
+
+.login-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #fff;
+    width: 100%;
+    height: 100%;
+}
+
+.login-popup {
+    .login-box {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        width: 60%;
+        padding: 20px;
+        border: 1px solid @borderColor;
+        .border-radius();
+    }
+}
+
+.chat-window {
+    .display-flex();
+    height: 100%;
+}
+
+.chat-window .friend-list {
+    .flex(1);
+    box-sizing: border-box;
+    padding: 10px 0;
+    border-right: 1px solid @borderColor;
+    overflow: auto;
+    li {
+        line-height: 30px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    li:hover,
+    li.selected {
+        background: @activeColor;
+    }
+    li.friend-self {
+        background: #ddd;
+    }
+}
+
+.chat-window .msg-box {
+    height: calc(~"100% - @{headerHeight} * 2");
+    box-sizing: border-box;
+    .flex(3);
+    .display-flex(column);
+    .msg-list {
+        .flex(4);
+    }
+    .msg-input-box {
+        .flex(1);
+        .display-flex(column);
+        border-top: 1px solid @borderColor;
+        .textarea {
+            .flex(4);
+            border: none;
+            padding: 5px;
+        }
+        .textarea:focus {
+            outline: none;
+        } 
+        button {
+            .flex(1);
+        }
+        .msg-input-toolbar {
+            padding: 5px 10px;
+            > span {
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+.msg-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: auto;
+}
+
+.msg-list li {
+    overflow: hidden;
+    .display-flex();
+    -webkit-align-items: center;
+    .display-flex();
+        -ms-flex-align: center;
+    .display-flex();
+            align-items: center;
+    .avartar {
+        margin: 10px 0 10px 10px;
+        width: 24px;
+    } 
+}
+
+.msg-list li.msg-self {
+    -webkit-flex-direction: row-reverse;
+        -ms-flex-direction: row-reverse;
+            flex-direction: row-reverse;
+    .avartar {
+        margin: 10px 10px 10px 0;
+    } 
+}
+
+
+
+.msg-content {
+    .border-radius(5px);
+    position: relative;
+    border: 1px solid @borderColor;
+    background: @borderColor;
+    font-size: @fontSize;
+    display: block;
+    padding: 5px 10px;
+    margin: 10px;
+    float: left;
+}
+
+.msg-content:before {
+    position: absolute;
+    content: '';
+    width: 0;
+    height: 0;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+    left: -20px;
+    border-width: 6px 10px;
+    border-color: transparent @borderColor transparent transparent;
+    border-style: solid;
+}
+
+.msg-content.from-self:before {
+    border-color: transparent transparent transparent @activeColor;
+    left: auto;
+    right: -20px;
+}
+
+.msg-content.from-self {
+    float: right;
+    background: @activeColor;
+    border-color: @activeColor;
+}
+
+.msg-note {
+    .border-radius(50%);
+    background: red;
+    color: #fff;
+    padding: 0 5px;
+    box-sizing: border-box;
+    min-width: 20px;
+    line-height: 20px;
+    margin-left: 5px;
+    display: inline-block;
+}
+
+.dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    width: 200px;
+}
+
+.avartar {
+    height: 24px;
+    .border-radius(50%);
+    border: 1px solid #fff;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.smile-icon {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    .border-radius(50%);
+    border: 1px solid @borderColor;
+    .mouth {
+        position: absolute;
+        bottom: 3px;
+        .border-radius(50%);
+        border-width: 0 0 1px 0;
+        border-style: solid;
+        border-color: @borderColor;
+        display: inline-block;
+        width: 60%;
+        height: 60%;
+        left: 50%;
+        -webkit-transform : translateX(-50%);
+        transform : translateX(-50%);
+    }
+}
+
+.smile-icon:hover {
+    border-color: @activeColor;
+    .mouth {
+        border-color: @activeColor;
+    }
+}
+
+.smile-icon:hover:before,
+.smile-icon:hover:after {
+    background: @activeColor;
+}
+
+.smile-icon:before,
+.smile-icon:after {
+    position: absolute;
+    content: '';
+    background: @borderColor;
+    width: 2px;
+    height: 3px;
+    top: 4px;
+}
+
+.smile-icon:before {
+    left: calc(~"50% - 5px");
+}
+
+.smile-icon:after {
+    right: calc(~"50% - 4px");
+}
+
+@iconHeight: 20px;
+
+.icons-pupup {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transform: translate(-50%, -26px);
+    width: 40vw;
+    background: #fff;
+    border: 1px solid @borderColor;
+    ul {
+        li {
+            width: @iconHeight;
+            height: @iconHeight;
+            margin: 5px;
+            // .border-radius(50%);
+            border: 1px solid transparent;
+            display: inline-block;
+            text-align: center;
+            line-height: @iconHeight;
+            box-sizing: border-box;
+        }
+        li:hover {
+            border: 1px solid @borderColor;
+        }
+    }
+}
+
+.icons-pupup:after {
+    position: absolute;
+    content: '';
+    bottom: -20px;
+    left: 50%;
+    margin-left: -1px;
+    width: 0;
+    height: 0;
+    border-color: @borderColor transparent transparent transparent;
+    border-style: solid;
+    border-width: 10px;
+}
+
+.icon-list li img {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+}
+
+.small-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}

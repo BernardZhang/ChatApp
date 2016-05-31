@@ -1,0 +1,245 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('chatapp:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Create Soket.io
+ */
+var io = require('socket.io')(server);
+var messageDao = require('../dao/MessageDao');
+var conversationDao = require('../dao/ConversationDao');
+var onlineUsers = {};
+var onlineCount = 0;
+var messages = [];
+var rooms = [];
+
+io.use(function(socket, next){
+    if (socket.request) {
+      return next();
+    }
+
+    next(new Error('Authentication error'));
+});
+
+io.on('connection', function (socket) {
+    socket.on('login', login.bind(null, socket));
+    socket.on('message', addMessage.bind(null, socket));
+    socket.on('disconnect', logout.bind(null, socket));
+    socket.on('messages', getMessages.bind(null, socket));
+    socket.on('createRoom', createRoom.bind(null, socket));
+    socket.on('setMsgRead', setMsgRead.bind(null, socket));
+});
+
+function getMessages(socket) {
+    // socket.emit('messages', messages);
+    messageDao.search({
+        conversationId: socket.room
+    }, function (messages) {
+        socket.emit('messages', messages);
+        // io.sockets.in(socket.room).emit('messages', messages);
+    });
+}
+
+function login(socket, data) {
+    // socket.name = data.id;
+    onlineUsers[data.id] = data.name;
+    onlineCount++;
+    console.log('login', data);
+    io.to('chat room').emit('login', data);
+    // io.sockets.emit('login', data);
+    // socket.emit('note', { '2': 6});
+    // io.sockets.emit('note1', { '2': 6});
+
+    messageDao.getUnreadMsg({
+        userId: data.id
+    }, function (nodes) {
+        var nodeObj = {};
+
+        nodes.forEach(function (item) {
+            var members = item.conversationId.split('-');
+            var index = members.indexOf(data.id + '');
+
+            if (index > -1) {
+                members.splice(index, 1);
+
+                members.forEach(function (userId) {
+                    nodeObj[userId] = item.count;
+                });
+            }
+        });
+        socket.emit('notes', nodeObj);
+        // io.sockets.in(socket.room).emit('note', nodeObj);
+    });
+}
+
+function addMessage(socket, msg) {
+    console.log('recive message', msg);
+    // messages.push(msg);
+    // socket.emit('message', msg);
+    // io.to('chat room').emit('message', msg);
+    // io.emit('message', msg);
+    // io.sockets.in(socket.room).emit('message', msg);
+    if (socket.room) {
+        // socket.to(socket.room).emit('message', msg);
+        // io.sockets.in(socket.room).emit('message', msg);
+        messageDao.create({
+            type: msg.type,
+            from: msg.from,
+            content: msg.content,
+            conversationId: socket.room
+        }, function (message) {
+            message.from = msg.from;
+            message.toMembers = socket.room.split('-');
+            console.log('add msg success', message);
+            // io.sockets.in(socket.room).emit('message', message);
+            // 这里暂时用广播，最好是能够针对指定用户发送message消息
+            socket.broadcast.emit('message', message);
+        });
+    } else {
+        // send the message to all connected clients
+        // io.emit('message', msg);
+
+        // send the message to all clients except itself
+        socket.broadcast.emit('message', msg);
+    }
+}
+
+function setMsgRead(socket, members) {
+    messageDao.search({
+        conversationId: members.sort().join('-')
+    }, function (messages) {
+        messages.forEach(function (msg) {
+            msg.readFlag = true;
+            messageDao.update(msg);
+        });
+    });
+}
+
+function logout(socket, data) {
+    if (onlineUsers.hasOwnProperty(socket.name)) {
+        delete onlineUsers[socket.name];
+        onlineCount--;
+    }
+}
+
+function createRoom(socket, options, callback) {
+    var room = options.roomId;
+    var members = room.split('-').sort();
+
+    room = members.join('-');
+
+    conversationDao.search({
+        members: members
+    }, function (res) {
+        if (res && res[0]) {
+            joinRoom(res[0]);
+        } else {
+            conversationDao.create({
+                members: JSON.stringify(members),
+                name: ''
+            }, joinRoom);
+        }
+    }); 
+
+    // if (rooms.indexOf(room) === -1) {
+    //     rooms.push(room);
+    // }
+    // 
+    function joinRoom(room) {
+        var roomId = JSON.parse(room.members).join('-');
+        socket.room = roomId;
+        socket.join(roomId, function (err) {
+            socket.emit('created', err || roomId);
+            console.log('join success:)', arguments);
+        });
+    }
+}
+
+
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}

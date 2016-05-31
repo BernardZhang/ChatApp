@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet/less" href="css/style.less" />
+    <script type="text/javascript" src="js/less.js"></script>
+</head>
+<body>
+    <header>
+        <h3>聊天系统</h3>
+    </header>
+
+    <section id="chatWindow" class="chat-window">
+        <ul id="friendList" class="friend-list"></ul>
+        <div id="chatMsgBox" class="msg-box hide">
+            <ul id="msgList" class="msg-list"></ul>
+            <div class="msg-input-box">
+                <div class="msg-input-toolbar">
+                    <span id="toolbarSmileIcon" class="smile-icon">
+                        <span class="mouth"></span>
+                        <div id="toolbarIconsPopup" class="icons-pupup hide">
+                            <ul class="icon-list">
+                                <li><img src="/img/1.png"></li>
+                                <li><img src="/img/2.png"></li>
+                                <li><img src="/img/3.png"></li>
+                                <li><img src="/img/4.png"></li>
+                                <li><img src="/img/5.png"></li>
+                                <li><img src="/img/6.png"></li>
+                                <li><img src="/img/7.png"></li>
+                                <li><img src="/img/8.png"></li>
+                                <li><img src="/img/9.png"></li>
+                                <li><img src="/img/10.png"></li>
+                                <li><img src="/img/11.png"></li>
+                                <li><img src="/img/12.png"></li>
+                                <li><img src="/img/13.png"></li>
+                                <li><img src="/img/14.png"></li>
+                            </ul>
+                        </div>
+                    </span>
+                </div>
+                <!-- <textarea id="msgInput" placeholder=""></textarea> -->
+                <div id="msgInput" class="textarea" contenteditable="true"></div>
+                <!-- <button id="sendMsg">发送</button>   -->
+            </div>
+        </div>
+    </section>
+
+    <div id="loginDlg" class="login-popup">
+        <div class="login-box">
+            <input id="username-input" placeholder="请输入用户名" /><br/>
+            <button id="start-chat-btn">开始聊天</button>
+            <button id="register-btn">新用户</button>
+        </div>
+    </div>
+
+    <footer></footer>
+
+    <script type="text/javascript" src="js/socket.io.js"></script>
+    <script type="text/javascript" src="js/chat.js"></script>
+</body>
+</html>

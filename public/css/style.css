@@ -1,0 +1,21 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+@fontSize: 15px;
+@borderColor: #ddd;
+
+.msg-item {
+    border-radius: 5px;
+    border: 1px solid @borderColor;
+    font-size: @fontSize;
+}
+
+.msg-item.from-self {
+    float: right;
+}
